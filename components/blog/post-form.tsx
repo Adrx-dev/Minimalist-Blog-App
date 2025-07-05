@@ -52,6 +52,28 @@ export function PostForm({ post, isEditing = false }: PostFormProps) {
     }
   }
 
+  const ensureUserProfile = async (user: any) => {
+    // Check if profile exists
+    const { data: existingProfile } = await supabase.from("profiles").select("id").eq("id", user.id).single()
+
+    if (!existingProfile) {
+      // Create profile if it doesn't exist
+      const { error: profileError } = await supabase.from("profiles").insert([
+        {
+          id: user.id,
+          email: user.email,
+          full_name: user.user_metadata?.full_name || "",
+          avatar_url: user.user_metadata?.avatar_url || "",
+        },
+      ])
+
+      if (profileError) {
+        console.error("Error creating profile:", profileError)
+        throw new Error("Failed to create user profile")
+      }
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
@@ -69,6 +91,9 @@ export function PostForm({ post, isEditing = false }: PostFormProps) {
         })
         return
       }
+
+      // Ensure user profile exists
+      await ensureUserProfile(user)
 
       const slug = generateSlug(title)
       const postData = {
@@ -93,9 +118,10 @@ export function PostForm({ post, isEditing = false }: PostFormProps) {
       }
 
       if (error) {
+        console.error("Database error:", error)
         toast({
           title: "Error",
-          description: error.message,
+          description: error.message || "Failed to save post",
           variant: "destructive",
         })
       } else {
@@ -106,10 +132,11 @@ export function PostForm({ post, isEditing = false }: PostFormProps) {
         router.push(`/post/${slug}`)
         router.refresh()
       }
-    } catch (error) {
+    } catch (error: any) {
+      console.error("Submission error:", error)
       toast({
         title: "Error",
-        description: "Something went wrong",
+        description: error.message || "Something went wrong",
         variant: "destructive",
       })
     } finally {

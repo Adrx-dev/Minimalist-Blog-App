@@ -20,6 +20,31 @@ export function AuthForm() {
   const { toast } = useToast()
   const supabase = createClient()
 
+  const ensureUserProfile = async (user: any) => {
+    try {
+      // Check if profile exists
+      const { data: existingProfile } = await supabase.from("profiles").select("id").eq("id", user.id).single()
+
+      if (!existingProfile) {
+        // Create profile if it doesn't exist
+        const { error: profileError } = await supabase.from("profiles").insert([
+          {
+            id: user.id,
+            email: user.email,
+            full_name: user.user_metadata?.full_name || "",
+            avatar_url: user.user_metadata?.avatar_url || "",
+          },
+        ])
+
+        if (profileError) {
+          console.error("Error creating profile:", profileError)
+        }
+      }
+    } catch (error) {
+      console.error("Profile creation error:", error)
+    }
+  }
+
   const handleSignUp = async (formData: FormData) => {
     setIsLoading(true)
     const email = formData.get("email") as string
@@ -52,8 +77,9 @@ export function AuthForm() {
           title: "Check your email",
           description: "We've sent you a confirmation link to complete your registration.",
         })
-      } else if (data.session) {
+      } else if (data.session && data.user) {
         // User is immediately signed in (email confirmation disabled)
+        await ensureUserProfile(data.user)
         toast({
           title: "Welcome!",
           description: "Your account has been created successfully.",
@@ -70,7 +96,7 @@ export function AuthForm() {
     const email = formData.get("email") as string
     const password = formData.get("password") as string
 
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     })
@@ -81,7 +107,8 @@ export function AuthForm() {
         description: error.message,
         variant: "destructive",
       })
-    } else {
+    } else if (data.user) {
+      await ensureUserProfile(data.user)
       toast({
         title: "Welcome back!",
         description: "You have been signed in successfully.",
