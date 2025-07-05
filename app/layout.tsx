@@ -8,8 +8,9 @@ import { Toaster } from "@/components/ui/toaster"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "MiniBlog - A Minimalist Blog Platform",
-  description: "Share your thoughts, ideas, and stories on our minimalist blog platform.",
+  title: "Lakambini XI | Archives",
+  description: "Share your thoughts, ideas, and stories on our archives platform.",
+    creator: 'adrx.dev',
     generator: 'v0.dev'
 }
 
