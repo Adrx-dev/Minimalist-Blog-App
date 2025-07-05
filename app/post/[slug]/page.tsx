@@ -1,12 +1,11 @@
-"use client"
-
 import { createClient } from "@/lib/supabase/server"
 import { notFound } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Calendar, User, Edit, ArrowLeft, Share2 } from "lucide-react"
+import { Calendar, User, Edit, ArrowLeft } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
+import { ShareButton } from "@/components/ui/share-button"
 
 interface PostPageProps {
   params: Promise<{ slug: string }>
@@ -53,23 +52,6 @@ export default async function PostPage({ params }: PostPageProps) {
 
   const isAuthor = user && user.id === post.author_id
 
-  const handleShare = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: post.title,
-          text: post.excerpt || post.title,
-          url: window.location.href,
-        })
-      } catch (error) {
-        // User cancelled sharing
-      }
-    } else {
-      // Fallback: copy to clipboard
-      navigator.clipboard.writeText(window.location.href)
-    }
-  }
-
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
@@ -108,10 +90,8 @@ export default async function PostPage({ params }: PostPageProps) {
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight leading-tight">{post.title}</h1>
 
               <div className="flex items-center gap-2 flex-shrink-0">
-                <Button variant="outline" size="sm" onClick={handleShare}>
-                  <Share2 className="h-4 w-4 sm:mr-2" />
-                  <span className="hidden sm:inline">Share</span>
-                </Button>
+                <ShareButton title={post.title} text={post.excerpt ?? post.title} className="hidden sm:inline-flex" />
+                <ShareButton title={post.title} text={post.excerpt ?? post.title} iconOnly className="sm:hidden" />
                 {isAuthor && (
                   <Button asChild variant="outline" size="sm">
                     <Link href={`/write/${post.id}`} className="flex items-center gap-2">
