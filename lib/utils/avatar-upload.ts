@@ -7,7 +7,7 @@ export interface AvatarUploadResult {
 }
 
 // Compress and resize image before upload
-export function compressImage(file: File, maxWidth = 200, quality = 0.8): Promise<File> {
+export function compressImage(file: File, maxWidth = 200, quality = 0.9): Promise<File> {
   return new Promise((resolve) => {
     const canvas = document.createElement("canvas")
     const ctx = canvas.getContext("2d")!
@@ -36,7 +36,7 @@ export function compressImage(file: File, maxWidth = 200, quality = 0.8): Promis
         maxWidth, // Destination rectangle
       )
 
-      // Convert to blob
+      // Convert to blob with higher quality for better preservation
       canvas.toBlob(
         (blob) => {
           if (blob) {
@@ -67,25 +67,23 @@ export async function uploadAvatar(file: File, userId: string): Promise<AvatarUp
       return { success: false, error: "Please upload only image files." }
     }
 
-    // Validate file size (2MB limit before compression)
-    if (file.size > 2 * 1024 * 1024) {
-      return { success: false, error: "Please upload images smaller than 2MB." }
+    // Validate file size (5MB limit before compression)
+    if (file.size > 5 * 1024 * 1024) {
+      return { success: false, error: "Please upload images smaller than 5MB." }
     }
 
-    // Compress and resize image
-    const compressedFile = await compressImage(file, 200, 0.8)
+    // Compress and resize image with higher quality
+    const compressedFile = await compressImage(file, 400, 0.9) // Larger size and higher quality
 
-    // Generate filename
-    const fileExt = "jpg" // Always save as JPG after compression
-    const fileName = `${userId}/avatar.${fileExt}`
+    // Generate unique filename with timestamp to ensure uniqueness
+    const timestamp = Date.now()
+    const fileExt = "jpg"
+    const fileName = `${userId}/avatar-${timestamp}.${fileExt}`
 
-    // Delete existing avatar first
-    await supabase.storage.from("avatars").remove([fileName])
-
-    // Upload new avatar
+    // Upload new avatar (don't delete old ones immediately for backup)
     const { data, error } = await supabase.storage.from("avatars").upload(fileName, compressedFile, {
-      cacheControl: "3600",
-      upsert: true,
+      cacheControl: "31536000", // Cache for 1 year
+      upsert: false, // Don't overwrite, create new file
     })
 
     if (error) {
@@ -98,7 +96,9 @@ export async function uploadAvatar(file: File, userId: string): Promise<AvatarUp
       data: { publicUrl },
     } = supabase.storage.from("avatars").getPublicUrl(data.path)
 
-    // Update profile with new avatar URL
+    // Update profile with new avatar URL and backup old URL
+    const { data: currentProfile } = await supabase.from("profiles").select("avatar_url").eq("id", userId).single()
+
     const { error: updateError } = await supabase
       .from("profiles")
       .update({
@@ -112,6 +112,25 @@ export async function uploadAvatar(file: File, userId: string): Promise<AvatarUp
       return { success: false, error: "Failed to update profile" }
     }
 
+    // Clean up old avatars (keep last 3 for backup)
+    try {
+      const { data: files } = await supabase.storage.from("avatars").list(userId)
+      if (files && files.length > 3) {
+        // Sort by created date and keep only the 3 most recent
+        const sortedFiles = files
+          .filter((file) => file.name.startsWith("avatar-"))
+          .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+          .slice(3) // Get files to delete (all except the 3 most recent)
+
+        if (sortedFiles.length > 0) {
+          const filesToDelete = sortedFiles.map((file) => `${userId}/${file.name}`)
+          await supabase.storage.from("avatars").remove(filesToDelete)
+        }
+      }
+    } catch (cleanupError) {
+      console.log("Cleanup warning:", cleanupError) // Don't fail the upload for cleanup issues
+    }
+
     return { success: true, url: publicUrl }
   } catch (error: any) {
     console.error("Avatar upload error:", error)
@@ -123,9 +142,18 @@ export async function deleteAvatar(userId: string): Promise<boolean> {
   try {
     const supabase = createClient()
 
-    // Delete from storage
-    const fileName = `${userId}/avatar.jpg`
-    await supabase.storage.from("avatars").remove([fileName])
+    // Get current avatar URL to extract filename
+    const { data: profile } = await supabase.from("profiles").select("avatar_url").eq("id", userId).single()
+
+    if (profile?.avatar_url) {
+      // Extract filename from URL
+      const url = new URL(profile.avatar_url)
+      const pathParts = url.pathname.split("/")
+      const fileName = pathParts[pathParts.length - 1]
+
+      // Delete from storage
+      await supabase.storage.from("avatars").remove([`${userId}/${fileName}`])
+    }
 
     // Update profile to remove avatar URL
     const { error } = await supabase
@@ -145,5 +173,30 @@ export async function deleteAvatar(userId: string): Promise<boolean> {
   } catch (error) {
     console.error("Avatar delete error:", error)
     return false
+  }
+}
+
+// Function to ensure avatar persistence
+export async function ensureAvatarPersistence(userId: string): Promise<void> {
+  try {
+    const supabase = createClient()
+
+    // Check if user has an avatar
+    const { data: profile } = await supabase.from("profiles").select("avatar_url").eq("id", userId).single()
+
+    if (profile?.avatar_url) {
+      // Verify the avatar URL is still accessible
+      try {
+        const response = await fetch(profile.avatar_url, { method: "HEAD" })
+        if (!response.ok) {
+          console.log("Avatar URL not accessible, clearing from profile")
+          await supabase.from("profiles").update({ avatar_url: null }).eq("id", userId)
+        }
+      } catch (error) {
+        console.log("Avatar verification failed:", error)
+      }
+    }
+  } catch (error) {
+    console.error("Avatar persistence check failed:", error)
   }
 }

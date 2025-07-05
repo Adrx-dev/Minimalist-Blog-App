@@ -5,7 +5,7 @@ import type React from "react"
 import { useState, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Camera, Loader2, Trash2, Upload } from "lucide-react"
+import { Camera, Loader2, Trash2, Upload, Sparkles } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { uploadAvatar, deleteAvatar } from "@/lib/utils/avatar-upload"
 
@@ -45,8 +45,9 @@ export function AvatarUpload({ currentAvatarUrl, userName, userId, onAvatarUpdat
       if (result.success && result.url) {
         onAvatarUpdate(result.url)
         toast({
-          title: "Success",
-          description: "Profile picture updated successfully!",
+          title: "✨ Success!",
+          description: "Your profile picture has been updated and saved permanently!",
+          className: "bg-gradient-to-r from-pink-50 to-blue-50 border-pink-200",
         })
         // Clear preview since we have the real URL now
         setPreviewUrl(null)
@@ -85,8 +86,9 @@ export function AvatarUpload({ currentAvatarUrl, userName, userId, onAvatarUpdat
       if (success) {
         onAvatarUpdate(null)
         toast({
-          title: "Success",
+          title: "Removed",
           description: "Profile picture removed successfully!",
+          className: "bg-gradient-to-r from-pink-50 to-blue-50 border-pink-200",
         })
       } else {
         toast({
@@ -118,14 +120,14 @@ export function AvatarUpload({ currentAvatarUrl, userName, userId, onAvatarUpdat
     <div className="flex flex-col items-center space-y-4">
       <div className="relative group">
         <Avatar
-          className={`${sizeClasses[size]} ring-2 ring-background shadow-lg transition-all duration-200 group-hover:ring-primary/20`}
+          className={`${sizeClasses[size]} ring-4 ring-gradient-to-r from-pink-200 to-blue-200 shadow-xl transition-all duration-300 group-hover:ring-pink-300 group-hover:shadow-2xl group-hover:scale-105`}
         >
           <AvatarImage
             src={displayUrl || "/placeholder.svg"}
             alt={userName || "User avatar"}
             className="object-cover"
           />
-          <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/10 text-primary font-semibold">
+          <AvatarFallback className="bg-gradient-to-br from-pink-100 via-purple-50 to-blue-100 text-transparent bg-clip-text bg-gradient-to-r from-pink-600 to-blue-600 font-bold text-lg">
             {initials}
           </AvatarFallback>
         </Avatar>
@@ -133,7 +135,7 @@ export function AvatarUpload({ currentAvatarUrl, userName, userId, onAvatarUpdat
         {/* Loading overlay */}
         {isUploading && (
           <div
-            className={`absolute inset-0 ${sizeClasses[size]} rounded-full bg-black/50 flex items-center justify-center`}
+            className={`absolute inset-0 ${sizeClasses[size]} rounded-full bg-gradient-to-r from-pink-500/50 to-blue-500/50 backdrop-blur-sm flex items-center justify-center`}
           >
             <Loader2 className="h-6 w-6 text-white animate-spin" />
           </div>
@@ -142,25 +144,29 @@ export function AvatarUpload({ currentAvatarUrl, userName, userId, onAvatarUpdat
         {/* Camera overlay on hover */}
         {!isUploading && size === "xl" && (
           <div
-            className="absolute inset-0 rounded-full bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center cursor-pointer"
+            className="absolute inset-0 rounded-full bg-gradient-to-r from-pink-500/80 to-blue-500/80 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center cursor-pointer backdrop-blur-sm"
             onClick={() => fileInputRef.current?.click()}
           >
-            <Camera className="h-6 w-6 text-white" />
+            <Camera className="h-8 w-8 text-white drop-shadow-lg" />
           </div>
         )}
       </div>
 
       {size === "xl" && (
-        <div className="flex gap-2">
+        <div className="flex gap-3">
           <Button
             variant="outline"
             size="sm"
             onClick={() => fileInputRef.current?.click()}
             disabled={isUploading}
-            className="bg-transparent"
+            className="bg-gradient-to-r from-pink-50 to-blue-50 border-pink-200 hover:from-pink-100 hover:to-blue-100 hover:border-pink-300 transition-all duration-300"
           >
-            {isUploading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Upload className="h-4 w-4 mr-2" />}
-            {currentAvatarUrl ? "Change" : "Upload"}
+            {isUploading ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin text-pink-600" />
+            ) : (
+              <Upload className="h-4 w-4 mr-2 text-pink-600" />
+            )}
+            <span className="gradient-text font-medium">{currentAvatarUrl ? "Change" : "Upload"}</span>
           </Button>
 
           {currentAvatarUrl && (
@@ -169,10 +175,10 @@ export function AvatarUpload({ currentAvatarUrl, userName, userId, onAvatarUpdat
               size="sm"
               onClick={handleDeleteAvatar}
               disabled={isUploading}
-              className="text-destructive hover:text-destructive bg-transparent"
+              className="border-pink-200 hover:border-red-300 hover:bg-red-50 transition-all duration-300 bg-transparent"
             >
-              <Trash2 className="h-4 w-4 mr-2" />
-              Remove
+              <Trash2 className="h-4 w-4 mr-2 text-red-500" />
+              <span className="text-red-600 font-medium">Remove</span>
             </Button>
           )}
         </div>
@@ -181,9 +187,13 @@ export function AvatarUpload({ currentAvatarUrl, userName, userId, onAvatarUpdat
       <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileSelect} className="hidden" />
 
       {size === "xl" && (
-        <p className="text-xs text-muted-foreground text-center max-w-xs">
-          Upload a square image for best results. Max 2MB. JPG, PNG, GIF, or WebP.
-        </p>
+        <div className="text-center space-y-2">
+          <p className="text-xs text-muted-foreground max-w-xs">
+            <Sparkles className="inline h-3 w-3 mr-1 text-pink-500" />
+            Upload a square image for best results. Photos are saved permanently!
+          </p>
+          <p className="text-xs text-pink-600 font-medium">Max 5MB • JPG, PNG, GIF, or WebP</p>
+        </div>
       )}
     </div>
   )
