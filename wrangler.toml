@@ -9,12 +9,7 @@ name = "minimalist-blog-production"
 name = "minimalist-blog-preview"
 
 # Build configuration
-[build]
-command = "npm run build"
-cwd = "."
 
-# Node.js compatibility
-compatibility_flags = ["nodejs_compat"]
 
 # Environment variables will be set in Cloudflare Dashboard
 # Don't put sensitive keys here - use the dashboard instead
