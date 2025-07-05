@@ -1,7 +1,8 @@
 import Link from "next/link"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Calendar, User, ImageIcon } from "lucide-react"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Calendar, ImageIcon } from "lucide-react"
 import type { Post } from "@/lib/types"
 import Image from "next/image"
 
@@ -17,6 +18,13 @@ export function PostCard({ post }: PostCardProps) {
       day: "numeric",
     })
   }
+
+  const authorName = post.profiles?.full_name || post.profiles?.email || "Anonymous"
+  const authorInitials = authorName
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
 
   return (
     <Card className="h-full hover:shadow-lg transition-all duration-200 overflow-hidden group">
@@ -34,16 +42,27 @@ export function PostCard({ post }: PostCardProps) {
       )}
 
       <CardHeader className="pb-3">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-          <Calendar className="h-4 w-4" />
-          <span>{formatDate(post.created_at)}</span>
-          {post.profiles && (
-            <>
-              <User className="h-4 w-4 ml-2" />
-              <span className="truncate">{post.profiles.full_name || post.profiles.email}</span>
-            </>
-          )}
+        <div className="flex items-center gap-3 mb-3">
+          <Avatar className="h-8 w-8 ring-2 ring-background">
+            <AvatarImage
+              src={post.profiles?.avatar_url || "/placeholder.svg"}
+              alt={authorName}
+              className="object-cover"
+            />
+            <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/10 text-primary text-xs font-semibold">
+              {authorInitials}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <span className="truncate font-medium">{authorName}</span>
+              <span>•</span>
+              <Calendar className="h-3 w-3" />
+              <span>{formatDate(post.created_at)}</span>
+            </div>
+          </div>
         </div>
+
         <Link href={`/post/${post.slug}`}>
           <h2 className="text-lg sm:text-xl font-semibold hover:text-primary transition-colors line-clamp-2 leading-tight">
             {post.title}

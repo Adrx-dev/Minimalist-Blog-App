@@ -1,6 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Image optimization settings
+  // Enable static exports for Cloudflare Pages
+  output: 'standalone',
+  
+  // Image optimization settings for Cloudflare
   images: {
     remotePatterns: [
       {
@@ -8,23 +11,11 @@ const nextConfig = {
         hostname: 'bpzmonsdihmvawtlurhl.supabase.co',
         port: '',
         pathname: '/storage/v1/object/public/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'localhost',
-        port: '3000',
-        pathname: '/**',
       }
     ],
     domains: [
-      'bpzmonsdihmvawtlurhl.supabase.co',
-      'localhost'
+      'bpzmonsdihmvawtlurhl.supabase.co'
     ],
-  },
-
-  // Disable server-side features for static export when needed
-  experimental: {
-    esmExternals: 'loose',
   },
 
   // Environment variables
@@ -49,12 +40,6 @@ const nextConfig = {
   // Disable x-powered-by header
   poweredByHeader: false,
 
-  // Compress responses
-  compress: true,
-
-  // Generate ETags for better caching
-  generateEtags: true,
-
   // ESLint configuration
   eslint: {
     ignoreDuringBuilds: true,
@@ -63,6 +48,11 @@ const nextConfig = {
   // TypeScript configuration
   typescript: {
     ignoreBuildErrors: true,
+  },
+
+  // Experimental features for better compatibility
+  experimental: {
+    esmExternals: 'loose',
   },
 };
 

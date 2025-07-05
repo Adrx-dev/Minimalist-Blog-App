@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "build": "next build",
-    "build:cloudflare": "next build && next export",
+    "build:cloudflare": "next build",
     "deploy": "wrangler pages deploy .next --project-name=minimalist-blog",
     "dev": "next dev",
     "lint": "next lint",
@@ -43,5 +43,8 @@
     "tailwindcss": "^3.3.0",
     "typescript": "^5",
     "wrangler": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }
