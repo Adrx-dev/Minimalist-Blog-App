@@ -34,18 +34,18 @@ export default async function HomePage() {
           <div className="flex items-center justify-center mb-6 float-animation">
             <div className="relative">
               <BookOpen className="h-16 w-16 sm:h-20 sm:w-20 text-transparent bg-gradient-to-r from-pink-500 to-blue-500 bg-clip-text" />
-              <Sparkles className="absolute -top-2 -right-2 h-6 w-6 text-pink-400 animate-pulse" />
+              <BookOpen className="absolute -top-2 -right-2 h-6 w-6 text-pink-400 animate-pulse" />
             </div>
           </div>
 
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight mb-6 sm:mb-8">
-            <span className="gradient-text">Welcome to MiniBlog</span>
+            <span className="gradient-text">Lakambini XI Archives</span>
           </h1>
 
           <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed mb-8 sm:mb-10">
-            A beautiful minimalist platform for sharing thoughts, ideas, and stories with
+            A platform for sharing thoughts, ideas, and stories with
             <Heart className="inline h-5 w-5 mx-1 text-pink-500" />
-            and stunning imagery.
+            memories.
           </p>
 
           {user && (

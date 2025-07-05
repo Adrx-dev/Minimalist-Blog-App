@@ -198,8 +198,8 @@ export function AuthForm() {
     <div className="flex items-center justify-center min-h-[80vh]">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle>Welcome to MiniBlog</CardTitle>
-          <CardDescription>Sign in to your account or create a new one to start blogging</CardDescription>
+          <CardTitle>Welcome to Lakambini 11 Archives</CardTitle>
+          <CardDescription>Sign in to your account or Create a new one.</CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="signin" className="w-full">

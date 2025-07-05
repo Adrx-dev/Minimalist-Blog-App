@@ -18,9 +18,9 @@ export async function Navbar() {
             <Link href="/" className="flex items-center gap-2 font-bold text-xl group">
               <div className="relative">
                 <BookOpen className="h-7 w-7 text-transparent bg-gradient-to-r from-pink-500 to-blue-500 bg-clip-text group-hover:scale-110 transition-transform duration-300" />
-                <Sparkles className="absolute -top-1 -right-1 h-3 w-3 text-pink-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <BookOpen className="absolute -top-1 -right-1 h-3 w-3 text-pink-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               </div>
-              <span className="hidden sm:inline gradient-text">MiniBlog</span>
+              <span className="hidden sm:inline gradient-text">Lakambini 11</span>
             </Link>
           </div>
 
