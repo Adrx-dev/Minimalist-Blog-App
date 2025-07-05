@@ -1,20 +1,28 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Enable static exports for better Cloudflare Pages compatibility
-  output: 'export',
-  trailingSlash: true,
-  skipTrailingSlashRedirect: true,
-  
-  // Image optimization settings for Cloudflare
+  // Image optimization settings
   images: {
-    unoptimized: true, // Disable Next.js image optimization for static export
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'bpzmonsdihmvawtlurhl.supabase.co',
+        port: '',
+        pathname: '/storage/v1/object/public/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'localhost',
+        port: '3000',
+        pathname: '/**',
+      }
+    ],
     domains: [
-      'bpzmonsdihmvawtlurhl.supabase.co', // Your Supabase domain
+      'bpzmonsdihmvawtlurhl.supabase.co',
       'localhost'
     ],
   },
 
-  // Disable server-side features that don't work with static export
+  // Disable server-side features for static export when needed
   experimental: {
     esmExternals: 'loose',
   },

@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -13,6 +13,7 @@ import { ImageUpload } from "@/components/ui/image-upload"
 import { createClient } from "@/lib/supabase/client"
 import { generateSlug } from "@/lib/utils/slug"
 import { useToast } from "@/hooks/use-toast"
+import { cleanupUnusedImages } from "@/lib/utils/image-cleanup"
 import type { Post } from "@/lib/types"
 import { Save, Eye } from "lucide-react"
 
@@ -29,10 +30,17 @@ export function PostForm({ post, isEditing = false }: PostFormProps) {
   const [published, setPublished] = useState(post?.published || false)
   const [featuredImage, setFeaturedImage] = useState(post?.featured_image || "")
   const [images, setImages] = useState<string[]>(post?.images || [])
+  const [originalImages, setOriginalImages] = useState<string[]>(post?.images || [])
 
   const router = useRouter()
   const { toast } = useToast()
   const supabase = createClient()
+
+  useEffect(() => {
+    if (post?.images) {
+      setOriginalImages(post.images)
+    }
+  }, [post])
 
   const handleImageAdd = (imageUrl: string, altText?: string, caption?: string) => {
     setImages((prev) => [...prev, imageUrl])
@@ -48,7 +56,8 @@ export function PostForm({ post, isEditing = false }: PostFormProps) {
 
     // Remove from featured image if it matches
     if (featuredImage === imageUrl) {
-      setFeaturedImage("")
+      const remainingImages = images.filter((img) => img !== imageUrl)
+      setFeaturedImage(remainingImages.length > 0 ? remainingImages[0] : "")
     }
   }
 
@@ -125,6 +134,30 @@ export function PostForm({ post, isEditing = false }: PostFormProps) {
           variant: "destructive",
         })
       } else {
+        // Clean up unused images if editing
+        if (isEditing) {
+          const allUsedImages = [...images]
+          // Get all images from all user's posts to avoid deleting images used elsewhere
+          const { data: userPosts } = await supabase
+            .from("posts")
+            .select("images, featured_image")
+            .eq("author_id", user.id)
+
+          if (userPosts) {
+            userPosts.forEach((userPost) => {
+              if (userPost.images) {
+                allUsedImages.push(...userPost.images)
+              }
+              if (userPost.featured_image) {
+                allUsedImages.push(userPost.featured_image)
+              }
+            })
+          }
+
+          // Clean up unused images
+          await cleanupUnusedImages(user.id, allUsedImages)
+        }
+
         toast({
           title: "Success",
           description: `Post ${isEditing ? "updated" : "created"} successfully`,
