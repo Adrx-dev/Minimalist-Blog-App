@@ -1,0 +1,41 @@
+name = "minimalist-blog"
+compatibility_date = "2024-01-15"
+pages_build_output_dir = ".next"
+
+[env.production]
+name = "minimalist-blog-production"
+
+[env.preview]
+name = "minimalist-blog-preview"
+
+# Environment variables for Cloudflare Pages
+# These will be set in the Cloudflare dashboard
+[[env.production.vars]]
+NEXT_PUBLIC_SUPABASE_URL = "https://bpzmonsdihmvawtlurhl.supabase.co"
+
+[[env.production.vars]]
+NEXT_PUBLIC_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJwem1vbnNkaWhtdmF3dGx1cmhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE3MjYxNDMsImV4cCI6MjA2NzMwMjE0M30.hMKc6mDAR7LXBIADx0v9wCQqZigDybMHDjXsNo3A8lo"
+
+[[env.preview.vars]]
+NEXT_PUBLIC_SUPABASE_URL = "https://bpzmonsdihmvawtlurhl.supabase.co"
+
+[[env.preview.vars]]
+NEXT_PUBLIC_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJwem1vbnNkaWhtdmF3dGx1cmhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE3MjYxNDMsImV4cCI6MjA2NzMwMjE0M30.hMKc6mDAR7LXBIADx0v9wCQqZigDybMHDjXsNo3A8lo"
+
+# Build configuration
+[build]
+command = "npm run build"
+cwd = "."
+
+# Node.js compatibility for Next.js
+[build.environment]
+NODE_VERSION = "18"
+
+# Custom build settings for Next.js on Cloudflare Pages
+[[build.env_vars]]
+name = "NODE_ENV"
+value = "production"
+
+[[build.env_vars]]
+name = "NEXT_TELEMETRY_DISABLED"
+value = "1"
