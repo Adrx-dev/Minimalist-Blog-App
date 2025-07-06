@@ -10,7 +10,10 @@ const inter = Inter({ subsets: ["latin"] })
 export const metadata: Metadata = {
   title: "Lakambini XI | Archives",
   description: "Share your thoughts, ideas, and stories on our archives platform.",
-    creator: 'adrx.dev',
+  creator: "adrx.dev",
+  icons: {
+    icon: "/favicon.ico"
+  },
     generator: 'v0.dev'
 }
 
