@@ -14,12 +14,12 @@ export default function ConfirmPage() {
             </div>
             <CardTitle>Email Confirmed!</CardTitle>
             <CardDescription>
-              Your email has been successfully confirmed. You can now access all features of MiniBlog.
+              Your email has been successfully confirmed. You can now access all features of Archives.
             </CardDescription>
           </CardHeader>
           <CardContent className="text-center space-y-4">
             <p className="text-sm text-muted-foreground">
-              Welcome to MiniBlog! You're now ready to start writing and sharing your thoughts.
+              Welcome to Lakambini XI Archives! You're now ready to start writing and sharing your thoughts.
             </p>
 
             <div className="flex flex-col gap-2">

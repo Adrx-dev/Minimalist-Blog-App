@@ -45,7 +45,7 @@ export async function Navbar() {
                 asChild
                 className="bg-gradient-to-r from-pink-500 to-blue-500 hover:from-pink-600 hover:to-blue-600 text-white shadow-md hover:shadow-lg transition-all duration-300"
               >
-                <Link href="/auth">Sign In</Link>
+                <Link href="/auth">Login</Link>
               </Button>
             )}
           </div>
